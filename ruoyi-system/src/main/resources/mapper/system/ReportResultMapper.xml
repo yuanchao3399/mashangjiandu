@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ReportResultMapper">
+    
+    <resultMap type="ReportResult" id="ReportResultResult">
+        <result property="id"    column="id"    />
+        <result property="reportId"    column="report_id"    />
+        <result property="process"    column="process"    />
+        <result property="isSuccess"    column="is_success"    />
+        <result property="opinion"    column="opinion"    />
+        <result property="evaluate"    column="evaluate"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateUser"    column="update_user"    />
+        <result property="transferUserTwo"    column="transfer_user_two"    />
+        <result property="transferTimeTwo"    column="transfer_time_two"    />
+        <result property="handResults"    column="hand_results"    />
+        <result property="handOpinion"    column="hand_opinion"    />
+        <result property="spare3"    column="spare3"    />
+    </resultMap>
+
+    <sql id="selectReportResultVo">
+        select id, report_id, process, is_success, opinion, evaluate, create_time, update_time, update_user,transfer_user_two,transfer_time_two, hand_results, hand_opinion, spare3 from report_result
+    </sql>
+
+    <select id="selectReportResultList" parameterType="ReportResult" resultMap="ReportResultResult">
+        <include refid="selectReportResultVo"/>
+        <where>  
+            <if test="reportId != null  and reportId != ''"> and report_id = #{reportId}</if>
+            <if test="process != null  and process != ''"> and process = #{process}</if>
+            <if test="isSuccess != null  and isSuccess != ''"> and is_success = #{isSuccess}</if>
+            <if test="opinion != null  and opinion != ''"> and opinion = #{opinion}</if>
+            <if test="evaluate != null  and evaluate != ''"> and evaluate = #{evaluate}</if>
+            <if test="updateUser != null  and updateUser != ''"> and update_user = #{updateUser}</if>
+            <if test="transferUserOne != null">transfer_user_one = #{transferUserOne},</if>
+            <if test="transferTimeOne != null">transfer_time_one = #{transferTimeOne},</if>
+            <if test="transferUserTwo != null">transfer_user_two = #{transferUserTwo},</if>
+            <if test="transferTimeTwo != null">transfer_time_two = #{transferTimeTwo},</if>
+            <if test="handResults != null">hand_results = #{handResults},</if>
+            <if test="handOpinion != null">hand_Opinion = #{handOpinion},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+        </where>
+    </select>
+    
+    <select id="selectReportResultById" parameterType="String" resultMap="ReportResultResult">
+        <include refid="selectReportResultVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertReportResult" parameterType="ReportResult">
+        insert into report_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="reportId != null">report_id,</if>
+            <if test="process != null">process,</if>
+            <if test="isSuccess != null">is_success,</if>
+            <if test="opinion != null">opinion,</if>
+            <if test="evaluate != null">evaluate,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateUser != null">update_user,</if>
+            <if test="transferUserOne != null">transfer_user,</if>
+            <if test="transferTimeTwo != null">transfer_time,</if>
+            <if test="transferUserTwo != null">transferUserTwo = #{transferUserTwo},</if>
+            <if test="transferTimeTwo != null">transferTimeTwo = #{transferTimeTwo},</if>
+            <if test="handResults != null">handResults = #{handResults},</if>
+            <if test="handOpinion != null">handOpinion = #{handOpinion},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="reportId != null">#{reportId},</if>
+            <if test="process != null">#{process},</if>
+            <if test="isSuccess != null">#{isSuccess},</if>
+            <if test="opinion != null">#{opinion},</if>
+            <if test="evaluate != null">#{evaluate},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateUser != null">#{updateUser},</if>
+            <if test="transferUserOne != null">transfer_user_one = #{transferUserOne},</if>
+            <if test="transferTimeOne != null">transfer_time_one = #{transferTimeOne},</if>
+            <if test="transferUserTwo != null">transfer_user_two = #{transferUserTwo},</if>
+            <if test="transferTimeTwo != null">transfer_time_two = #{transferTimeTwo},</if>
+            <if test="handResults != null">hand_results = #{handResults},</if>
+            <if test="handOpinion != null">hand_Opinion = #{handOpinion},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+         </trim>
+    </insert>
+
+    <update id="updateReportResult" parameterType="ReportResult">
+        update report_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reportId != null">report_id = #{reportId},</if>
+            <if test="process != null">process = #{process},</if>
+            <if test="isSuccess != null">is_success = #{isSuccess},</if>
+            <if test="opinion != null">opinion = #{opinion},</if>
+            <if test="evaluate != null">evaluate = #{evaluate},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+            <if test="transferUserOne != null">transfer_user_one = #{transferUserOne},</if>
+            <if test="transferTimeOne != null">transfer_time_one = #{transferTimeOne},</if>
+            <if test="transferUserTwo != null">transfer_user_two = #{transferUserTwo},</if>
+            <if test="transferTimeTwo != null">transfer_time_two = #{transferTimeTwo},</if>
+            <if test="handResults != null">hand_results = #{handResults},</if>
+            <if test="handOpinion != null">hand_Opinion = #{handOpinion},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+
+        </trim>
+        where report_id = #{id}
+    </update>
+
+    <update id="revokeReportResultById" parameterType="ReportResult">
+        update report_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="process != null">process = #{process},</if>
+            <if test="isSuccess != null">is_success = #{isSuccess},</if>
+            <if test="process == 1">transfer_user_one =null,transfer_time_one = null,</if>
+            <if test="process == 2">transfer_user_two =null,transfer_time_two = null,</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteReportResultById" parameterType="String">
+        delete from report_result where id = #{id}
+    </delete>
+
+    <delete id="deleteReportResultByIds" parameterType="String">
+        delete from report_result where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

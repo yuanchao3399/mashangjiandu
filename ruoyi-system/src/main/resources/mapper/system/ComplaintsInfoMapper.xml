@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ComplaintsInfoMapper">
+    
+    <resultMap type="ComplaintsInfo" id="ComplaintsInfoResult">
+        <result property="id"    column="id"    />
+        <result property="reprotPerson"    column="reprot_person"    />
+        <result property="reportCompany"    column="report_company"    />
+        <result property="post"    column="post"    />
+        <result property="problemType"    column="problem_type"    />
+        <result property="content"    column="content"    />
+        <result property="isReal"    column="is_real"    />
+        <result property="realName"    column="real_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="isSuccess"    column="is_success"    />
+        <result property="opinion"    column="opinion"    />
+        <result property="evaluate"    column="evaluate"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="politicsFace"    column="politics_face"    />
+        <result property="spare3"    column="spare3"    />
+        <result property="completionTime"    column="completion_time"    />
+    </resultMap>
+
+    <sql id="selectComplaintsInfoVo">
+        select timestampdiff(DAY ,a.create_time,a.update_time) as completion_time ,id, reprot_person, 	d.dict_label as report_company,post,a.title,a.level,dd.dict_label as problem_type, content, is_real, real_name, phone, is_success, opinion, evaluate, a.create_time, a.update_time, a.id_card, a.politics_face, spare3 from complaints_info a
+    </sql>
+
+    <select id="selectComplaintsInfoList" parameterType="ComplaintsInfo" resultMap="ComplaintsInfoResult">
+        <include refid="selectComplaintsInfoVo"/>
+
+        lEFT JOIN sys_dict_data d on report_company = d.dict_value and d.dict_type = 'report_company'
+     lEFT JOIN sys_dict_data dd on problem_type = dd.dict_value and dd.dict_type = 'problem_type'
+        <where>  
+            <if test="reprotPerson != null  and reprotPerson != ''"> and reprot_person = #{reprotPerson}</if>
+            <if test="reportCompany != null  and reportCompany != ''"> and report_company = #{reportCompany}</if>
+            <if test="post != null  and post != ''"> and post = #{post}</if>
+            <if test="problemType != null  and problemType != ''"> and problem_type = #{problemType}</if>
+            <if test="content != null  and content != ''"> and content  like concat('%',#{content},'%')</if>
+            <if test="isSuccess != null  and isSuccess != ''"> and is_success = #{isSuccess}</if>
+            <if test="startTime != null  and startTime != ''"> and STR_TO_DATE(a.create_time, '%Y-%m-%d %H:%i:%s') >= #{startTime}</if>
+            <if test="endTime != null  and endTime != ''"> and STR_TO_DATE(a.create_time, '%Y-%m-%d %H:%i:%s') &lt;= #{endTime}</if>
+        </where>
+        order by a.create_time desc
+    </select>
+    
+    <select id="selectComplaintsInfoById" parameterType="String" resultMap="ComplaintsInfoResult">
+        <include refid="selectComplaintsInfoVo"/>
+        lEFT JOIN sys_dict_data d on report_company = d.dict_value and d.dict_type = 'report_company'
+        lEFT JOIN sys_dict_data dd on problem_type = dd.dict_value and dd.dict_type = 'problem_type'
+        where id = #{id}
+    </select>
+        
+    <insert id="insertComplaintsInfo" parameterType="ComplaintsInfo">
+        insert into complaints_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="reprotPerson != null">reprot_person,</if>
+            <if test="reportCompany != null">report_company,</if>
+            <if test="post != null">post,</if>
+            <if test="level != null">level,</if>
+            <if test="title != null">title,</if>
+            <if test="problemType != null">problem_type,</if>
+            <if test="content != null">content,</if>
+            <if test="isReal != null">is_real,</if>
+            <if test="realName != null">real_name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="isSuccess != null">is_success,</if>
+            <if test="opinion != null">opinion,</if>
+            <if test="evaluate != null">evaluate,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateUser != null">update_user,</if>
+            <if test="idCard != null">id_card,</if>
+            <if test="politicsFace != null">politics_face,</if>
+            <if test="spare3 != null">spare3,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="reprotPerson != null">#{reprotPerson},</if>
+            <if test="reportCompany != null">#{reportCompany},</if>
+            <if test="post != null">#{post},</if>
+            <if test="level != null">#{level},</if>
+            <if test="title != null">#{title},</if>
+            <if test="problemType != null">#{problemType},</if>
+            <if test="content != null">#{content},</if>
+            <if test="isReal != null">#{isReal},</if>
+            <if test="realName != null">#{realName},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="isSuccess != null">#{isSuccess},</if>
+            <if test="opinion != null">#{opinion},</if>
+            <if test="evaluate != null">#{evaluate},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateUser != null">#{updateUser},</if>
+            <if test="idCard != null">#{idCard},</if>
+            <if test="politicsFace != null">#{politicsFace},</if>
+            <if test="spare3 != null">#{spare3},</if>
+         </trim>
+    </insert>
+
+    <update id="updateComplaintsInfo" parameterType="ComplaintsInfo">
+        update complaints_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="reprotPerson != null">reprot_person = #{reprotPerson},</if>
+            <if test="reportCompany != null">report_company = #{reportCompany},</if>
+            <if test="post != null">post = #{post},</if>
+            <if test="level != null">post = #{level},</if>
+            <if test="title != null">post = #{title},</if>
+            <if test="problemType != null">problem_type = #{problemType},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="isReal != null">is_real = #{isReal},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="isSuccess != null">is_success = #{isSuccess},</if>
+            <if test="opinion != null">opinion = #{opinion},</if>
+            <if test="evaluate != null">evaluate = #{evaluate},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="politicsFace != null">politics_face = #{politicsFace},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteComplaintsInfoById" parameterType="String">
+        delete from complaints_info where id = #{id}
+    </delete>
+
+    <delete id="deleteComplaintsInfoByIds" parameterType="String">
+        delete from complaints_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

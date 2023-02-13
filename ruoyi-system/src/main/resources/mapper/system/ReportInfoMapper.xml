@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ReportInfoMapper">
+    
+    <resultMap type="ReportInfo" id="ReportInfoResult">
+        <result property="id"    column="id"    />
+        <result property="serviceType"    column="service_type"    />
+        <result property="windowNum"    column="window_num"    />
+        <result property="content"    column="content"    />
+        <result property="detailInfo"    column="detail_info"  />
+        <result property="type"    column="type"    />
+        <result property="fileId"    column="file_id"    />
+        <result property="isReal"    column="is_real"    />
+        <result property="realName"    column="real_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="politicsFace"    column="politics_face"    />
+        <result property="spare3"    column="spare3"    />
+        <result property="completionTime"    column="completion_time"    />
+    </resultMap>
+
+
+    <resultMap type="ReportExcelVo" id="ReportExcelResult">
+        <result property="id"    column="id"    />
+        <result property="serviceType"    column="service_type"    />
+        <result property="windowNum"    column="window_num"    />
+        <result property="content"    column="content"    />
+        <result property="detailInfo"    column="detail_info"  />
+        <result property="type"    column="type"    />
+        <result property="fileId"    column="file_id"    />
+        <result property="isReal"    column="is_real"    />
+        <result property="realName"    column="real_name"    />
+        <result property="phone"    column="phone"    />
+        <result property="process"    column="process"    />
+        <result property="isSuccess"    column="is_success"    />
+        <result property="opinion"    column="opinion"    />
+        <result property="evaluate"    column="evaluate"    />
+    </resultMap>
+
+    <resultMap id="ReportInfoReportResultResult" type="ReportInfo" extends="ReportInfoResult">
+        <collection property="reportResultList" notNullColumn="sub_id" javaType="java.util.List" resultMap="ReportResultResult" />
+    </resultMap>
+
+    <resultMap type="ReportResult" id="ReportResultResult">
+        <result property="id"    column="sub_id"    />
+        <result property="reportId"    column="sub_report_id"    />
+        <result property="process"    column="sub_process"    />
+        <result property="isSuccess"    column="sub_is_success"    />
+        <result property="opinion"    column="sub_opinion"    />
+        <result property="evaluate"    column="evaluate"    />
+        <result property="createTime"    column="sub_create_time"    />
+        <result property="updateTime"    column="sub_update_time"    />
+        <result property="updateUser"    column="sub_update_user"    />
+        <result property="handResults"    column="sub_hand_results"    />
+        <result property="handOpinion"    column="sub_hand_opinion"    />
+        <result property="spare3"    column="sub_spare3"    />
+    </resultMap>
+
+    <sql id="selectReportInfoVo">
+        select timestampdiff(DAY ,a.create_time,b.update_time) as completion_time ,a.id, d.dict_label as service_type, a.window_num, a.content,dd.dict_label as detail_info, a.type, a.file_id, a.is_real, a.real_name, a.phone, a.create_time, a.update_time, a.id_card, a.politics_face, a.spare3,
+               b.id as sub_id, b.report_id as sub_report_id, b.process as sub_process, b.is_success as sub_is_success, b.opinion as sub_opinion, b.evaluate as evaluate, b.create_time as sub_create_time, b.update_time as sub_update_time, b.update_user as sub_update_user, b.hand_results as sub_hand_results, b.hand_opinion as sub_hand_opinion, b.spare3 as sub_spare3
+        from report_info a
+                 left join report_result b on b.report_id = a.id
+     </sql>
+
+    <sql id="selectReportExcel">
+        select a.id, d.dict_label as service_type, a.window_num, a.content,dd.dict_label as detail_info, a.type, a.file_id, a.is_real, a.real_name, a.phone, a.create_time, a.update_time,a.id_card,a.politics_face,
+                b.process as process, b.is_success as is_success, b.opinion as opinion, b.evaluate as evaluate
+        from report_info a
+                 left join report_result b on b.report_id = a.id
+    </sql>
+
+    <sql id="time">
+        <if test="startTime != null  and startTime != ''">
+            and STR_TO_DATE(create_time, '%Y-%m-%d') >= STR_TO_DATE(#{startTime}, '%Y-%m-%d')
+        </if>
+        <if test="endTime != null  and endTime != ''">
+            and STR_TO_DATE(create_time, '%Y-%m-%d') &lt;= STR_TO_DATE(#{endTime}, '%Y-%m-%d')
+        </if>
+    </sql>
+
+
+    <select id="selectReportInfoList" parameterType="ReportInfoVo" resultMap="ReportInfoReportResultResult">
+        <include refid="selectReportInfoVo"/>
+
+        lEFT JOIN sys_dict_data d on a.service_type = d.dict_value and d.dict_type = 'service_type'
+        lEFT JOIN sys_dict_data dd on a.detail_info = dd.dict_value and dd.dict_type = 'detail_info'
+
+        <where>
+            <if test="serviceType != null  and serviceType != ''"> and service_type = #{serviceType}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="detailInfo != null  and detailInfo != ''"> and detail_info = #{detailInfo}</if>
+            <if test="isSuccess != null  and isSuccess != ''"> and is_success = #{isSuccess}</if>
+            <if test="roleCode != null  and roleCode != ''">
+                <choose>
+                    <when test="roleCode == '23'">
+                      and  b.process = '2' or  b.process='3'
+                    </when>
+                    <otherwise>
+                       and b.process = #{roleCode}
+                    </otherwise>
+                </choose>
+             </if>
+
+
+            <if test="content != null  and content != ''"> and a.content  like concat('%',#{content},'%')</if>
+            <if test="startTime != null  and startTime != ''"> and STR_TO_DATE(a.create_time, '%Y-%m-%d') >= #{startTime}</if>
+            <if test="endTime != null  and endTime != ''"> and STR_TO_DATE(a.create_time, '%Y-%m-%d') &lt;= #{endTime}</if>
+
+
+        </where>
+        order by a.create_time desc
+    </select>
+
+
+    <select id="selectReportExcel" parameterType="ReportInfoVo" resultMap="ReportExcelResult">
+        <include refid="selectReportExcel"/>
+
+        lEFT JOIN sys_dict_data d on a.service_type = d.dict_value and d.dict_type = 'service_type'
+        lEFT JOIN sys_dict_data dd on a.detail_info = dd.dict_value and dd.dict_type = 'detail_info'
+
+        <where>
+            <if test="serviceType != null  and serviceType != ''"> and service_type = #{serviceType}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="detailInfo != null  and detailInfo != ''"> and detail_info = #{detailInfo}</if>
+            <if test="isSuccess != null  and isSuccess != ''"> and is_success = #{isSuccess}</if>
+            <if test="roleCode != null  and roleCode != ''"> and b.process = #{roleCode}</if>
+            <!--        <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+                    <if test="spare1 != null  and spare1 != ''"> and spare1 = #{spare1}</if>
+                    <if test="spare2 != null  and spare2 != ''"> and spare2 = #{spare2}</if>
+                    <if test="spare3 != null  and spare3 != ''"> and spare3 = #{spare3}</if>
+                    -->
+        </where>
+    </select>
+
+    <select id="selectReportInfoById" parameterType="String" resultMap="ReportInfoReportResultResult">
+        select a.id, d.dict_label as service_type, a.window_num, a.content,dd.dict_label as detail_info, a.type, a.file_id, a.is_real, a.real_name, a.phone, a.create_time, a.update_time, a.id_card, a.politics_face, a.spare3,
+ b.id as sub_id, b.report_id as sub_report_id, b.process as sub_process, b.is_success as sub_is_success, b.opinion as sub_opinion, b.evaluate as evaluate, b.create_time as sub_create_time, b.update_time as sub_update_time, b.update_user as sub_update_user, b.hand_results as sub_hand_results, b.hand_opinion as sub_hand_opinion, b.spare3 as sub_spare3
+        from report_info a
+        left join report_result b on b.report_id = a.id
+        lEFT JOIN sys_dict_data d on a.service_type = d.dict_value and d.dict_type = 'service_type'
+        lEFT JOIN sys_dict_data dd on a.detail_info = dd.dict_value and dd.dict_type = 'detail_info'
+        where a.id = #{id}
+    </select>
+
+    <insert id="insertReportInfo" parameterType="ReportInfo">
+        insert into report_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="serviceType != null">service_type,</if>
+            <if test="windowNum != null">window_num,</if>
+            <if test="content != null">content,</if>
+            <if test="detailInfo != null">detail_info,</if>
+            <if test="type != null">type,</if>
+            <if test="fileId != null">file_id,</if>
+            <if test="isReal != null">is_real,</if>
+            <if test="realName != null">real_name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="idCard != null">id_card,</if>
+            <if test="politicsFace != null">politics_face,</if>
+            <if test="spare3 != null">spare3,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="serviceType != null">#{serviceType},</if>
+            <if test="windowNum != null">#{windowNum},</if>
+            <if test="content != null">#{content},</if>
+            <if test="detailInfo != null">#{detailInfo},</if>
+            <if test="type != null">#{type},</if>
+            <if test="fileId != null">#{fileId},</if>
+            <if test="isReal != null">#{isReal},</if>
+            <if test="realName != null">#{realName},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="idCard != null">#{idCard},</if>
+            <if test="politicsFace != null">#{politicsFace},</if>
+            <if test="spare3 != null">#{spare3},</if>
+         </trim>
+    </insert>
+
+    <update id="updateReportInfo" parameterType="ReportInfo">
+        update report_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="serviceType != null">service_type = #{serviceType},</if>
+            <if test="windowNum != null">window_num = #{windowNum},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="detailInfo != null">detail_info=#{detailInfo},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="fileId != null">file_id = #{fileId},</if>
+            <if test="isReal != null">is_real = #{isReal},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="idCard != null">id_card = #{idCard},</if>
+            <if test="politicsFace != null">politics_face = #{politicsFace},</if>
+            <if test="spare3 != null">spare3 = #{spare3},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteReportInfoById" parameterType="String">
+        delete from report_info where id = #{id}
+    </delete>
+
+    <delete id="deleteReportInfoByIds" parameterType="String">
+        delete from report_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+    <delete id="deleteReportResultByIds" parameterType="String">
+        delete from report_result where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteReportResultById" parameterType="String">
+        delete from report_result where id = #{id}
+    </delete>
+
+    <insert id="batchReportResult">
+        insert into report_result( id, report_id, process, is_success, opinion, evaluate, create_time, update_time, update_user, spare1, spare2, spare3) values
+		<foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.reportId}, #{item.process}, #{item.isSuccess}, #{item.opinion}, #{item.evaluate}, #{item.createTime}, #{item.updateTime}, #{item.updateUser}, #{item.spare1}, #{item.spare2}, #{item.spare3})
+        </foreach>
+    </insert>
+
+    <select id="allNum" resultType="java.util.Map">
+        select * from
+         (
+             SELECT IFNULL(count(id) ,0) as yearts FROM report_info WHERE YEAR(create_time) = YEAR(NOW())
+         ) a ,
+         (
+             SELECT IFNULL(count(id),0) as mouthts FROM report_info WHERE MONTH(create_time) = MONTH(NOW())
+         ) b ,
+         (
+             SELECT IFNULL(count(id),0) as dayts FROM report_info WHERE date_format(create_time, '%Y-%m-%d') = date_format(NOW(), '%Y-%m-%d')
+         ) c ,
+         (
+             SELECT IFNULL(count(i.id),0) as waitts FROM report_info i LEFT JOIN report_result r on i.id = r.report_id where r.is_success = 'N'
+         ) d,
+         (
+             SELECT IFNULL(count(id) ,0) as yearjb FROM complaints_info WHERE YEAR(create_time) = YEAR(NOW())
+         ) e ,
+         (
+             SELECT IFNULL(count(id) ,0) as mouthjb FROM complaints_info WHERE MONTH(create_time) = MONTH(NOW())
+         ) f ,
+         (
+             SELECT IFNULL(count(id) ,0) as dayjb FROM complaints_info WHERE date_format(create_time, '%Y-%m-%d') = date_format(NOW(), '%Y-%m-%d')
+         ) g ,
+         (
+             SELECT IFNULL(count(id) ,0) as waitjb FROM complaints_info WHERE is_success = 'N'
+         ) h
+
+    </select>
+
+    <select id="tsNum" resultType="java.util.Map">
+        select * from
+                     (
+                         SELECT IFNULL(count(id) ,0) as yearts FROM report_info WHERE YEAR(create_time) = YEAR(NOW())
+                     ) a ,
+                     (
+                         SELECT IFNULL(count(id),0) as mouthts FROM report_info WHERE MONTH(create_time) = MONTH(NOW())
+                     ) b ,
+                     (
+                         SELECT IFNULL(count(id),0) as dayts FROM report_info WHERE date_format(create_time, '%Y-%m-%d') = date_format(NOW(), '%Y-%m-%d')
+                     ) c ,
+                     (
+                         SELECT IFNULL(count(i.id),0) as waitts FROM report_info i LEFT JOIN report_result r on i.id = r.report_id where r.is_success = 'N'
+                     ) d
+
+    </select>
+
+
+    <select id="barNum" resultType="java.util.Map">
+        select aa.dict_label as label,num,num2 from
+            (
+                SELECT dict_label,num ,dict_value from
+                        (SELECT * from sys_dict_data a where a. dict_type='service_type') a  LEFT JOIN
+                    (select count(*) num,service_type from report_info
+                     where type='1' group by service_type)
+                        b
+                    on  a.dict_value=b.service_type
+            )aa
+                LEFT JOIN
+            (
+                SELECT dict_label,num2 ,dict_value from
+                        (SELECT * from sys_dict_data a where a. dict_type='service_type') a  LEFT JOIN
+                    (select count(*) num2,service_type from report_info
+                     where type='2' group by service_type)
+                        c on a.dict_value=c.service_type
+            ) bb
+            on aa.dict_value =bb.dict_value
+    </select>
+
+
+    <select id="homePieChartJb" resultType="map">
+
+        SELECT d.dict_label name ,IFNULL(a.count,0) as value,IFNULL(round(a.count/(SELECT count(1) FROM complaints_info)*100,2),0) as jbProportion
+        FROM  ( SELECT dict_label,dict_value FROM sys_dict_data WHERE dict_type = 'problem_type') d
+            LEFT JOIN
+            (SELECT problem_type,count(1) as count FROM complaints_info
+            WHERE 1=1
+            <include refid="time"/>
+            GROUP BY problem_type ) a
+        on a.problem_type = d.dict_value
+
+
+    </select>
+    <select id="homePieChartTs" resultType="map">
+
+        SELECT d.dict_label name ,IFNULL(a.count,0) as value,IFNULL(round(a.count/(SELECT count(1) FROM report_info WHERE type = '1')*100,2),0) as tsProportion
+        FROM
+            ( SELECT dict_label,dict_value FROM sys_dict_data WHERE dict_type = 'service_type') d
+        LEFT JOIN
+            (SELECT service_type,count(1) as count FROM report_info
+                WHERE 1=1
+                <include refid="time"/>
+                and type = '1'
+                GROUP BY service_type ) a
+        on a.service_type = d.dict_value
+
+    </select>
+
+
+    <select id="homeLineChart" resultType="java.util.Map">
+
+      <!--  SELECT d.datelist name,IFNULL(i.tscount,0) as tscount,IFNULL(i.jbcount,0) as jbcount FROM
+            (SELECT * FROM calendar WHERE datelist BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY)  and NOW()) d
+                LEFT JOIN
+            (SELECT
+                 STR_TO_DATE(create_time, '%Y-%m-%d') as time,
+		SUM(CASE WHEN type = '1' THEN 1 ELSE 0 END) tscount,
+		SUM(CASE WHEN type = '2' THEN 1 ELSE 0 END) jbcount
+             FROM  report_info GROUP BY STR_TO_DATE(create_time, '%Y-%m-%d'))
+                i on d.datelist = i.time  -->
+        select * from  (
+        SELECT d.datelist name,IFNULL(i.tscount,0) as tscount,IFNULL(ci.jbcount,0) as jbcount FROM
+            (
+                SELECT * FROM calendar WHERE datelist BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY)  and NOW()
+            ) d
+            LEFT JOIN
+            (
+                SELECT STR_TO_DATE(create_time, '%Y-%m-%d') as time,count(1) as tscount
+                FROM  report_info GROUP BY STR_TO_DATE(create_time, '%Y-%m-%d')
+            ) i on d.datelist = i.time
+            LEFT JOIN
+            (
+                SELECT STR_TO_DATE(create_time, '%Y-%m-%d') as time,count(1) as jbcount
+                FROM  complaints_info GROUP BY STR_TO_DATE(create_time, '%Y-%m-%d')
+            ) ci on d.datelist = ci.time ) s
+             order by name
+
+    </select>
+
+    <select id="getNumByTime" resultType="java.util.Map">
+        SELECT * FROM
+        (
+            SELECT count(id) as tscount  FROM report_info WHERE 1=1
+            <include refid="time"/>
+        ) a,
+        (
+            SELECT count(id) as jbcount FROM complaints_info where 1=1
+            <include refid="time"/>
+        ) b
+    </select>
+
+    <select id="getTsNumByTime" resultType="java.util.Map">
+
+        SELECT count(id) as tscount  FROM report_info WHERE 1=1
+        <include refid="time"/>
+
+    </select>
+
+
+    <select id="homeYearBarChart" resultType="java.util.Map">
+
+     <!--   SELECT a.time, IFNULL(b.tsNum,0) as tsNum, IFNULL(b.jbNum,0) as jbNum FROM
+            (
+                SELECT SUBSTRING(datelist,1,7) time FROM calendar WHERE YEAR(datelist) = YEAR(NOW()) GROUP BY SUBSTRING(datelist,1,7)
+            ) a
+                LEFT JOIN
+            (
+                SELECT SUBSTRING(create_time,1,7) time,
+			SUM(CASE type WHEN 1 THEN 1 ELSE 0 END) as tsNum ,
+			SUM(CASE type WHEN 2 THEN 1 ELSE 0 END) as jbNum
+                FROM report_info GROUP BY SUBSTRING(create_time,1,7)
+            ) b
+            on a.time = b.time -->
+
+       <!--  SELECT a.time, IFNULL(b.tsNum,0) as tsNum,IFNULL(c.jbNum,0) as jbNum  FROM
+            (
+                SELECT SUBSTRING(datelist,1,7) time FROM calendar WHERE YEAR(datelist) = YEAR(NOW()) GROUP BY SUBSTRING(datelist,1,7)
+            ) a
+        LEFT JOIN
+            (
+                SELECT SUBSTRING(create_time,1,7) time,count(1) as tsNum
+                FROM report_info GROUP BY SUBSTRING(create_time,1,7)
+            ) b on a.time = b.time
+        LEFT JOIN
+            (
+                SELECT SUBSTRING(create_time,1,7) time,count(1) as jbNum
+                FROM complaints_info GROUP BY SUBSTRING(create_time,1,7)
+            ) c on a.time = c.time
+-->
+        select  * from (
+        SELECT a.time, IFNULL(b.dsjj,0) as dsjjNum,IFNULL(b.zwb,0) as zwbNum  FROM
+        (
+            SELECT SUBSTRING(datelist,1,7) time FROM calendar WHERE YEAR(datelist) = YEAR(NOW()) GROUP BY SUBSTRING(datelist,1,7)
+        ) a
+        LEFT JOIN
+        (
+            SELECT
+                SUBSTRING(create_time,1,7) time,
+                SUM(CASE WHEN report_company = 1 THEN 1 ELSE 0 END) dsjj,
+                SUM(CASE WHEN report_company = 2 THEN 1 ELSE 0 END) zwb
+                FROM complaints_info
+            GROUP BY SUBSTRING(create_time,1,7)
+        ) b on a.time = b.time ) s
+
+        order by s.time
+
+
+
+    </select>
+
+
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.ReportFileMapper">
+    
+    <resultMap type="ReportFile" id="ReportFileResult">
+        <result property="id"    column="id"    />
+        <result property="pid"    column="pid"    />
+        <result property="isactive"    column="isactive"    />
+        <result property="url"    column="url"    />
+        <result property="fileName"    column="file_name"    />
+        <result property="extension"    column="extension"    />
+        <result property="osname"    column="osname"    />
+        <result property="size"    column="size"    />
+        <result property="type"    column="type"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectReportFileVo">
+        select id, pid, isactive, url, file_name, extension, osname, size, type, create_time from report_file
+    </sql>
+
+    <select id="selectReportFileList" parameterType="ReportFile" resultMap="ReportFileResult">
+        <include refid="selectReportFileVo"/>
+        <where>  
+            <if test="pid != null  and pid != ''"> and pid = #{pid}</if>
+            <if test="isactive != null  and isactive != ''"> and isactive = #{isactive}</if>
+            <if test="url != null  and url != ''"> and url = #{url}</if>
+            <if test="fileName != null  and fileName != ''"> and file_name like concat('%', #{fileName}, '%')</if>
+            <if test="extension != null  and extension != ''"> and extension = #{extension}</if>
+            <if test="osname != null  and osname != ''"> and osname like concat('%', #{osname}, '%')</if>
+            <if test="size != null  and size != ''"> and size = #{size}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        </where>
+    </select>
+    
+    <select id="selectReportFileById" parameterType="String" resultMap="ReportFileResult">
+        <include refid="selectReportFileVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectReportFileByPid" parameterType="String" resultMap="ReportFileResult">
+        <include refid="selectReportFileVo"/>
+        where pid = #{id}
+    </select>
+
+    <insert id="insertReportFile" parameterType="ReportFile">
+        insert into report_file
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="pid != null">pid,</if>
+            <if test="isactive != null">isactive,</if>
+            <if test="url != null">url,</if>
+            <if test="fileName != null">file_name,</if>
+            <if test="extension != null">extension,</if>
+            <if test="osname != null">osname,</if>
+            <if test="size != null">size,</if>
+            <if test="type != null">type,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="pid != null">#{pid},</if>
+            <if test="isactive != null">#{isactive},</if>
+            <if test="url != null">#{url},</if>
+            <if test="fileName != null">#{fileName},</if>
+            <if test="extension != null">#{extension},</if>
+            <if test="osname != null">#{osname},</if>
+            <if test="size != null">#{size},</if>
+            <if test="type != null">#{type},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateReportFile" parameterType="ReportFile">
+        update report_file
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pid != null">pid = #{pid},</if>
+            <if test="isactive != null">isactive = #{isactive},</if>
+            <if test="url != null">url = #{url},</if>
+            <if test="fileName != null">file_name = #{fileName},</if>
+            <if test="extension != null">extension = #{extension},</if>
+            <if test="osname != null">osname = #{osname},</if>
+            <if test="size != null">size = #{size},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteReportFileById" parameterType="String">
+        delete from report_file where id = #{id}
+    </delete>
+
+    <delete id="deleteReportFileByIds" parameterType="String">
+        delete from report_file where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
